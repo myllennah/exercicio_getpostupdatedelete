@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lista de Clientes</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+    <script src="./js/script.js" defer></script>
+  </head>
+  <body>
+    <div class="form-container">
+    <h2>Lista de clientes</h2>
+    <table border="1px">
+      <tr>
+        <th>Cód</th>
+        <th>Nome</th>
+        <th>Sobrenome</th>
+        <th>E-mail</th>
+        <th>Celular</th>
+        <th>Endereço</th>
+      </tr>
+
+      <% if (clientes.length > 0) { %> <% for(var i = 0; i < clientes.length;
+      i++) { %>
+      <tr>
+        <td><%-clientes[i].codcliente %></td>
+        <td><%-clientes[i].nome %></td>
+        <td><%-clientes[i].sobrenome %></td>
+        <td><%-clientes[i].email %></td>
+        <td><%-clientes[i].whatsapp %></td>
+        <td>CEP: <%-clientes[i].cep %><br><%-clientes[i].logradouro %><br><%-clientes[i].bairro %><br><%-clientes[i].numero %><br><%-clientes[i].complemento %><br><%-clientes[i].cidade %><br><%-clientes[i].estado %></td>
+        <td>
+          <a href="/detalhescliente?codcliente= <%- clientes[i].codcliente %>">Alterar</a>
+        </td>
+      </tr>
+      <% } %> <% } else { %>
+      <h1>Não há clientes cadastrados</h1>
+      <% } %>
+    </table>
+  </div>
+  </body>
+</html>
