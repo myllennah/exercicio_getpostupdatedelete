@@ -11,7 +11,7 @@
     <div class="form-container">
         <h2>Alterar ou Excluir Cadastro de Usuário</h2>
 
-      <form action="/update-clientes" method="POST">
+      <form action="/update-clientes/<%= clientes.codcliente %>?_method=PUT" method="POST">
         <input type="hidden" name="codcliente" value="<%= clientes.codcliente %>">
 
         <!-- Dados Pessoais -->
@@ -130,12 +130,11 @@
       </form>
 
       <!-- Delete -->
-      <form action="/delete-clientes" method="post" style="display:inline;">
+      <form action="/delete-clientes/<%= clientes.codcliente %>?_method=DELETE" method="post" style="display:inline;">
         <input type="hidden" name="codcliente" value="<%= clientes.codcliente %>">
         <button id="excluir" type="submit" onclick="return confirm('Tem certeza de que deseja excluir este cadastro?')">Excluir cadastro</button>
       </form>
     </div>
     </div>
     </div>
-    
   </body>

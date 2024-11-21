@@ -3,12 +3,14 @@ var conexao = require("./conexaobanco");
 var express = require("express");
 var app = express();
 var bodyParser = require("body-parser");
+var methodOverride = require('method-override');
 
 app.use(bodyParser.json()); //pega o que foi digitado transforma os dados em html (objeto)
 app.use(bodyParser.urlencoded({ extended: true })); //aprova, dá o ok
 app.set("view engine", "ejs");
 app.use(express.json());  // Para requisições com body JSON
 app.use(express.urlencoded({ extended: true }));  // Para requisições URL-encoded
+app.use(methodOverride('_method'));
 
 // conexão com public e views
 app.use(express.static("public"));
@@ -40,12 +42,12 @@ app.post("/", (req, res) => {
   var sql =
     "INSERT INTO clientes(nome, sobrenome, email, whatsapp, cep, logradouro, numero, complemento, bairro, cidade, estado) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
-  conexao.query(
-    sql,
-    [nome, sobrenome, email, whatsapp, cep, logradouro, numero, complemento, bairro, cidade, estado],
+  conexao.query(sql, [nome, sobrenome, email, whatsapp, cep, logradouro, numero, complemento, bairro, cidade, estado],
     function (error, result) {
-      if (error) throw error;
-      //res.send("Estudante cadastrado com sucesso! " +result.insertId);
+      if(error){
+        console.log('Erro ao adicionar usuário', error);
+        return res.status(500).json({error: 'Erro ao adicionar usuário'});
+    }
       res.redirect("/listadeclientes");
     }
   );
@@ -76,10 +78,11 @@ app.get('/detalhescliente', function(req, res) {
   });
 });
 
-app.post('/update-clientes', function(req, res) {
+app.put('/update-clientes/:codcliente', (req, res) => {
   console.log('Dados recebidos para atualização:', req.body);
-  var { nome, sobrenome, email, whatsapp, cep, logradouro, numero, complemento, bairro, cidade, estado, codcliente } = req.body;
-  console.log('codcliente:', codcliente);
+  
+  var {codcliente} = req.params;
+  var { nome, sobrenome, email, whatsapp, cep, logradouro, numero, complemento, bairro, cidade, estado } = req.body;
 
   // Verificar se o codcliente existe
   conexao.query('SELECT * FROM clientes WHERE codcliente = ?', [codcliente], function(error, results) {
@@ -93,24 +96,32 @@ app.post('/update-clientes', function(req, res) {
 
     // Executar a atualização
     var sqlUpdate = "UPDATE clientes SET nome=?, sobrenome=?, email=?, whatsapp=?, cep=?, logradouro=?, numero=?, complemento=?, bairro=?, cidade=?, estado=? WHERE codcliente=?";
-    conexao.query(sqlUpdate, [nome, sobrenome, email, whatsapp, cep, logradouro, numero, complemento, bairro, cidade, estado, codcliente], function(error, result) {
-      if (error) {
-        console.log('Erro na atualização:', error);
-        return res.status(500).send('Erro no servidor');
+    
+    conexao.query(sqlUpdate, [nome, sobrenome, email, whatsapp, cep, logradouro, numero, complemento, bairro, cidade, estado, codcliente], (error, result) => {
+      if(error) {
+        console.error('Erro ao atualizar usuário: ', error);
+        return res.status(500).json({ error: 'Erro ao atualizar o usuário'});
+    }
+      if (result.affectedRows === 0) {
+          return res.status(404).jason({ error: 'Usuário não encontrado'});
       }
       console.log('Atualização bem-sucedida:', result);
       res.redirect('/listadeclientes');
     });
   });
 });
-app.post('/delete-clientes', function(req, res) {
+
+app.delete('/delete-clientes/:codcliente', function(req, res) {
   var sqlDelete = "DELETE FROM clientes WHERE codcliente = ?";
-  var codcliente = req.body.codcliente;
+  var {codcliente} = req.params;
 
   conexao.query(sqlDelete, [codcliente], function(error, result) {
-    if (error) {
-      console.log('Erro ao deletar:', error);
-      return res.status(500).send('Erro no servidor');
+    if(error){
+      console.error('Erro ao excluir usuário', error);
+      return res.status(500).json({ error: 'Erro ao excluir usuário'});
+    }
+    if(result.affectedRows === 0){
+        return res.status(404).json({ error: 'Usuário não encontrado'})
     }
     res.redirect('/listadeclientes');
   });
